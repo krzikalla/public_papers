@@ -86,9 +86,7 @@ template<class T, class BinaryOperation = plus<>>
   \pnum\expects
   \tcode{binary_op} does not modify \tcode{x}.
 
-  \pnum\returns
-  \tcode{\placeholdernc{GENERALIZED_SUM}(binary_op, x)}
-  (\iref{numerics.defns}).
+  \pnum\returns \tcode{x}
 
   \pnum\throws
   Any exception thrown from \tcode{binary_op}.
@@ -124,7 +122,7 @@ template<class T, class BinaryOperation = plus<>>
 
   \pnum\returns
   If \tcode{mask} is \tcode{false}, returns \tcode{identity_element}.
-  Otherwise, returns \tcode{\placeholdernc{GENERALIZED_SUM}(binary_op, x)}.
+  Otherwise, returns \tcode{x}.
 
   \pnum\throws
   Any exception thrown from \tcode{binary_op}.
