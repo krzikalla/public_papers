@@ -1,0 +1,462 @@
+% wg21macros.sty
+%
+% Copyright © 2013-2014 Matthias Kretz <kretz@kde.org>
+% All rights reserved.
+%
+% Redistribution and use in source and binary forms, with or without
+% modification, are permitted provided that the following conditions are met:
+%     * Redistributions of source code must retain the above copyright
+%       notice, this list of conditions and the following disclaimer.
+%     * Redistributions in binary form must reproduce the above copyright
+%       notice, this list of conditions and the following disclaimer in the
+%       documentation and/or other materials provided with the distribution.
+%     * Neither the names of contributing organizations nor the
+%       names of its contributors may be used to endorse or promote products
+%       derived from this software without specific prior written permission.
+%
+% THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+% ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+% WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+% DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+% DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+% (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+% LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+% ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+% (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+% SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{wg21macros}[2014/10/27 v0.1 Macros for WG21 documents markup]
+
+%\RequirePackage[normalem]{ulem}
+\RequirePackage{soul}
+\RequirePackage{xcolor}
+\RequirePackage{relsize}
+\RequirePackage{listings}
+
+\newif\ifwgmacros@mono@
+\wgmacros@mono@false
+\DeclareOption{mono}{\wgmacros@mono@true}
+\ProcessOptions
+
+\DeclareTextFontCommand{\wgGrammar}{\rmfamily\itshape\mdseries}
+\DeclareTextFontCommand{\wgIdentifier}{\ttfamily\upshape\mdseries}
+\newcommand\wgNote[1]{\mdseries[~\textit{Note:}
+#1
+—~\textit{end note}~]}
+\newenvironment{noteEnv}
+{
+\mdseries[~\textit{Note:}
+}{
+—~\textit{end note}~]
+}
+\newcommand\wgExample[1]{\mdseries[~\textit{Example:}
+#1
+—~\textit{end example}~]}
+\newenvironment{exampleEnv}
+{
+\noindent\mdseries[~\textit{Example:}
+}{
+—~\textit{end example}~]
+}
+\ifwgmacros@mono@
+\colorlet{WgAdd}{black}
+\colorlet{WgRem}{black}
+\else
+\colorlet{WgAdd}{green!65!blue!80!black}
+\colorlet{WgRem}{red!80!black}
+\fi
+\soulregister{\code}{1}
+\soulregister{\type}{1}
+\soulregister{\tcode}{1}
+\newcommand\wgAdd[1]{\textcolor{WgAdd}{\ul{#1}}}
+\newcommand\wgRemove[1]{\textcolor{WgRem}{\st{#1}}} % deprecated
+\newcommand\wgRem[1]{\textcolor{WgRem}{\st{#1}}}
+\newcommand\wgChange[2]{\wgRem{#1}\wgAdd{#2}}
+\newcommand\wgItemAdd[1][]{\color{WgAdd}\item[\ul{\mbox{ \textbullet }}]\hspace*{-\labelsep}\ul{\mbox{\hspace*{\labelsep}}}\wgAdd{#1}}
+\newcommand\wgItemRem[1][]{\color{WgRem}\item[\st{\mbox{ \textbullet }}]\hspace*{-\labelsep}\st{\mbox{\hspace*{\labelsep}}}\wgRem{#1}}
+\newenvironment{wgBAdd}{\color{WgAdd}}{\color{black}}
+\newenvironment{wgBRem}{\color{WgRem}}{\color{black}}
+\newcommand\wgTextFonts{\def\ttdefault{wgCodeFont}\rmfamily\smaller[1]}
+\def\wgLabelPrefix{}%
+\newenvironment{wgText}[1][]{%
+  \vskip.2\baselineskip plus 1\baselineskip
+  \begingroup%
+  \let\wgRealRef=\ref%
+  \renewcommand\ref[1]{\wgRealRef{sec:\wgLabelPrefix##1}}%
+  \lstset{%
+    language=C++,
+    keywordstyle=,
+    stringstyle=,
+    xleftmargin=1em,
+    showstringspaces=false,
+    columns=flexible,
+    keepspaces=true,
+    numbers=none,
+    backgroundcolor=,
+    fillcolor=,
+    texcl=true,
+    frame=none,
+    commentstyle={\rmfamily\itshape},
+    basicstyle={\ttfamily},
+    moredelim=**[is][\color{WgAdd}]{|+}{+|},
+    moredelim=**[is][\color{WgRem}]{|-}{-|},
+    moredelim=**[is][\itshape]{|/}{/|}
+  }%
+  \let\type=\code%
+  \wgTextFonts%
+  \par\noindent\hrulefill%
+  \begingroup%
+    \def\arg{#1}%
+    \def\empty{}%
+    \ifx\arg\empty\else%
+      \hspace{1ex} #1%
+    \fi%
+  \endgroup\par\nopagebreak[4]\vskip.2\baselineskip%
+}
+{%
+  \par\nopagebreak[4]\vskip-.3\baselineskip\nopagebreak[4]\noindent\hrulefill%
+  \endgroup\par%
+  \vskip.9\baselineskip plus 4\baselineskip\pagebreak[1]%
+}
+
+%%--------------------------------------------------
+%% Paragraph numbering
+\RequirePackage{chngcntr}
+\newcounter{WGClause}
+\newcounter{WGSubSection}[WGClause]
+\newcounter{WGSubSubSection}[WGSubSection]
+\newcounter{WGSubSubSubSection}[WGSubSubSection]
+\newcounter{WGParagraph}[WGSubSubSubSection]
+\newcounter{Paras}
+%\counterwithin{Paras}{chapter}
+\counterwithin{Paras}{WGClause}
+\counterwithin{Paras}{WGSubSection}
+\counterwithin{Paras}{WGSubSubSection}
+\counterwithin{Paras}{WGSubSubSubSection}
+\counterwithin{Paras}{WGParagraph}
+\def\theWgStableName{}
+\newcommand\useStdStablenameRef{
+\makeatletter
+\def\pnum{\par%
+  \stepcounter{Paras}%
+  \protected@edef\@currentlabel{[\theWgStableName]}%
+\noindent\llap{{%
+  \scriptsize\raisebox{.5ex}{\arabic{Paras}}}\hspace{\@totalleftmargin}\quad}}
+\makeatother
+}
+\newcommand\useVerboseStablenameRef{
+\makeatletter
+\def\pnum{\par%
+  \stepcounter{Paras}%
+  \protected@edef\@currentlabel{[\theWgStableName]~p.\arabic{Paras}}%
+\noindent\llap{{%
+  \scriptsize\raisebox{.5ex}{\arabic{Paras}}}\hspace{\@totalleftmargin}\quad}}
+\makeatother
+}
+\useVerboseStablenameRef
+
+\newenvironment{indented}
+{\list{}{}\item\relax}
+{\endlist}
+
+\lstnewenvironment{itemdecl}
+{
+ \lstset{escapechar=@,
+ frame=none,
+ backgroundcolor=,
+ fillcolor=,
+ xleftmargin=0em,
+ aboveskip=2ex,
+ belowskip=0ex	% leave this alone: it keeps these things out of the
+				% footnote area
+ }
+}
+{
+}
+
+\newenvironment{itemdescr}
+{
+ \begin{indented}}
+{
+ \end{indented}
+}
+
+%% Library function descriptions
+\newcommand{\Fundescx}[1]{\textit{#1}}
+\newcommand{\Fundesc}[1]{\Fundescx{#1}:\space}
+\newcommand{\recommended}{\Fundesc{Recommended practice}}
+\newcommand{\required}{\Fundesc{Required behavior}}
+\newcommand{\constraints}{\mbox{\Fundesc{Constraints}}}
+\newcommand{\mandates}{\mbox{\Fundesc{Mandates}}}
+\newcommand{\expects}{\mbox{\Fundesc{Preconditions}}}
+\newcommand{\effects}{\mbox{\Fundesc{Effects}}}
+\newcommand{\ensures}{\Fundesc{Postconditions}}
+\newcommand{\returns}{\mbox{\textit{Returns:}\ }}
+\newcommand{\throws}{\mbox{\textit{Throws:}\ }}
+\newcommand{\default}{\Fundesc{Default behavior}}
+\newcommand{\complexity}{\Fundesc{Complexity}}
+\newcommand{\remarks}{\mbox{\textit{Remarks:}\ }}
+\newcommand{\errors}{\Fundesc{Error conditions}}
+\newcommand{\sync}{\Fundesc{Synchronization}}
+\newcommand{\implimits}{\Fundesc{Implementation limits}}
+\newcommand{\replaceable}{\Fundesc{Replaceable}}
+\newcommand{\result}{\Fundesc{Result}}
+\newcommand{\returntype}{\Fundesc{Return type}}
+\newcommand{\ctype}{\Fundesc{Type}}
+\newcommand{\templalias}{\Fundesc{Alias template}}
+
+% Obsolete library function descriptions
+\newcommand{\requires}{\Fundesc{Requires}}
+\newcommand{\postconditions}{\Fundesc{Postconditions}}
+\newcommand{\postcondition}{\Fundesc{Postcondition}}
+\newcommand{\preconditions}{\requires}
+\newcommand{\precondition}{\requires}
+\newcommand{\remark}{\mbox{\textit{Remark:}\ }}
+%\newcommand{\note}{\remark}
+\newcommand{\notes}{\remarks}
+%\newcommand{\realnote}{\Fundesc{Note}}
+%\newcommand{\realnotes}{\Fundesc{Notes}}
+\newcommand{\exceptionsafety}{\Fundesc{Exception safety}}
+\newcommand{\cvalue}{\Fundesc{Value}}
+\newcommand{\ctypes}{\Fundesc{Types}}
+\newcommand{\dtype}{\Fundesc{Default type}}
+\newcommand{\ctemplate}{\Fundesc{Class template}}
+
+\DeclareRobustCommand\std{\code{std\MayBreak::\MayBreak}}
+\DeclareRobustCommand\stdx{\code{std\MayBreak::\MayBreak{}ex\-per\-i\-men\-tal\MayBreak::\MayBreak}}
+\DeclareRobustCommand\stdranges{\code{std\MayBreak::\MayBreak{}ranges\MayBreak::\MayBreak}}
+
+\newcommand{\wgOrigSection}[1]{%
+    \leavevmode\llap{\normalfont\usekomafont{#1}(\csname #1format\endcsname\hspace{-.3em})\qquad}%
+}
+\makeatletter
+\newcommand{\wgSection}[3][subsection]{%
+    \par%
+    \vskip1.0\baselineskip plus 1.5\baselineskip minus 0.2\baselineskip%
+    \phantomsection%
+    \stepcounter{#1}%
+    \stepcounter{WGClause}%
+    \setcounter{Paras}{0}%
+    \def\theWgStableName{#3}%
+    \def\theWGSubSection{\theWGClause{}}%
+    \def\theWGSubSubSection{\theWGClause{}}%
+    \def\theWGSubSubSubSection{\theWGClause{}}%
+    \protected@edef\@currentlabel{[#3]}%
+    \addcontentsline{toc}{#1}{%
+      \theWGClause{} #2 [#3] (\thesubsection{})%
+    }%
+    \let\oexposid\exposid\let\exposid\textit%
+    {\noindent\wgOrigSection{#1}\larger[2]\textbf{\arabic{WGClause} #2\label{sec:\wgLabelPrefix#3}\hfill[#3]}}\\%
+    \let\exposid\oexposid%
+    \noindent%
+}
+\newcommand\wgSubsection[3][subsubsection]{%
+    \par%
+    \vskip0.75\baselineskip plus 1.0\baselineskip minus 0.15\baselineskip%
+    \phantomsection%
+    \stepcounter{#1}%
+    \stepcounter{WGSubSection}%
+    \setcounter{Paras}{0}%
+    \def\theWgStableName{#3}%
+    \def\theWGSubSection{\theWGClause{}.\arabic{WGSubSection}}%
+    \def\theWGSubSubSection{\theWGSubSection{}}%
+    \def\theWGSubSubSubSection{\theWGSubSubSection}%
+    \protected@edef\@currentlabel{[#3]}%
+    \addcontentsline{toc}{#1}{%
+      \theWGSubSection{} #2 [#3] (\thesubsubsection{})%
+    }%
+    \let\oexposid\exposid\let\exposid\textit%
+    {\noindent\wgOrigSection{#1}\larger[1]\textbf{\theWGSubSection{} #2\label{sec:\wgLabelPrefix#3}\hfill[#3]}}\\%
+    \let\exposid\oexposid%
+    \noindent%
+}
+\newcommand\wgSubsubsection[3][paragraph]{%
+    \par%
+    \vskip0.5\baselineskip plus .5\baselineskip minus 0.1\baselineskip%
+    \phantomsection%
+    \stepcounter{#1}%
+    \stepcounter{WGSubSubSection}%
+    \setcounter{Paras}{0}%
+    \def\theWgStableName{#3}%
+    \def\theWGSubSubSection{\theWGClause{}.\arabic{WGSubSection}.\arabic{WGSubSubSection}}%
+    \def\theWGSubSubSubSection{\theWGSubSubSection}%
+    \protected@edef\@currentlabel{[#3]}%
+    \addcontentsline{toc}{#1}{%
+      \theWGSubSubSection{} #2 [#3] (\theparagraph{})%
+    }%
+    \let\oexposid\exposid\let\exposid\textit%
+    {\noindent\wgOrigSection{#1}\larger[1]\textbf{\theWGSubSubSection{} #2\label{sec:\wgLabelPrefix#3}\hfill[#3]}}\\%
+    \let\exposid\oexposid%
+    \noindent%
+}
+\newcommand\wgSubsubsubsection[3][subparagraph]{%
+    \par%
+    \vskip0.5\baselineskip plus .5\baselineskip minus 0.1\baselineskip%
+    \phantomsection%
+    \stepcounter{#1}%
+    \stepcounter{WGSubSubSubSection}%
+    \setcounter{Paras}{0}%
+    \def\theWgStableName{#3}%
+    \def\theWGSubSubSubSection{\theWGClause{}.\arabic{WGSubSection}.\arabic{WGSubSubSection}.\arabic{WGSubSubSubSection}}%
+    \protected@edef\@currentlabel{[#3]}%
+    \addcontentsline{toc}{#1}{%
+      \theWGSubSubSubSection{} #2 [#3] (\thesubparagraph{})%
+    }%
+    \let\oexposid\exposid\let\exposid\textit%
+    {\noindent\wgOrigSection{#1}\larger[1]\textbf{\theWGSubSubSubSection{} #2\label{sec:\wgLabelPrefix#3}\hfill[#3]}}\\%
+    \let\exposid\oexposid%
+    \noindent%
+}
+\makeatother
+
+\newcommand\guidance[1]{\textit{\small Requesting Guidance:} #1}
+
+\newcommand\wgVote[3]{
+  \noindent #1\\
+  \begin{tabular}{#2}
+    #3 \\
+  \end{tabular}\par
+}
+\newcommand\wgPoll[2]{%
+  \wgVote{\textbf{Poll:} #1}
+  {r|r|r|r|r}
+  {SF & F & N & A & SA \\
+    \hline
+  #2}
+  \bigskip
+}
+\newcommand\wgUnanimous[1]{
+  \noindent \textbf{Poll:} #1\\
+  $\rightarrow$ unanimous consent\par
+  \bigskip
+}
+
+\newcommand{\tabref}[1]{Table~\ref{#1}}
+
+\newenvironment{beforeaftertable}[2][before & after]{%
+\begin{table}[hbtp]
+\caption{#2}
+\smaller%
+\begin{tabular}{p{.45\textwidth}|p{.45\textwidth}}
+#1 \\
+\hline
+}{%
+\end{tabular}%
+\end{table}%
+}
+
+\newcommand{\ttref}[1]{\st{Tony~}Table~\ref{tt:#1}}
+
+\newcounter{TonyTable}
+
+\newenvironment{tonytable}[2][before]{%
+  \renewcommand\tablename{\st{Tony}Before/After Table}%
+\let\prevthetable\thetable%
+\addtocounter{table}{-1}%
+\stepcounter{TonyTable}%
+\renewcommand\thetable{\arabic{TonyTable}}%
+\begin{table}[hbtp]
+\caption{#2}
+\smaller%
+\begin{tabular}{p{.45\textwidth}|p{.45\textwidth}}
+#1&with \wgDocumentNumber\\
+\hline
+}{%
+\end{tabular}%
+\end{table}%
+\let\thetable\prevthetable%
+\renewcommand\tablename{Table}%
+}
+
+\newcommand\UnaryTypeTrait{\texttt{UnaryTypeTrait}\xspace}
+\newcommand\BinaryTypeTrait{\texttt{BinaryTypeTrait}\xspace}
+\newcommand\BaseCharacteristic{\texttt{BaseCharacteristic}\xspace}
+
+\newcommand{\noteintro}[1]{[\,\textit{#1:}\space}
+\newcommand{\noteoutro}[1]{\textit{\,---\,end #1}\,]}
+\soulregister{\noteintro}{1}
+\soulregister{\noteoutro}{1}
+\newenvironment{note}[1][Note]{\noteintro{#1}}{\noteoutro{note}\xspace}
+\newenvironment{example}[1][Example]{\noteintro{#1}}{\noteoutro{example}\xspace}
+
+\newcommand{\indextext}[1]{}
+\newcommand{\indexdefn}[1]{\indextext{#1}}
+
+%%--------------------------------------------------
+% General code style
+\newcommand{\CodeStyle}{\ttfamily}
+\newcommand{\CodeStylex}[1]{\texttt{#1}}
+
+\newcommand{\iref}[1]{\nolinebreak[3] ([#1])}
+
+% Code and definitions embedded in text.
+\newcommand{\tcode}[1]{\CodeStylex{#1}}
+\newcommand{\techterm}[1]{\textit{#1}\xspace}
+\newcommand{\defnx}[2]{\indexdefn{#2}\textit{#1}\xspace}
+\newcommand{\defn}[1]{\defnx{#1}{#1}}
+\newcommand{\term}[1]{\textit{#1}\xspace}
+\newcommand{\grammarterm}[1]{\textit{#1}\xspace}
+\newcommand{\placeholder}[1]{\textit{#1}}
+\newcommand{\placeholdernc}[1]{\textit{#1\nocorr}}
+\newcommand{\exposid}[1]{\tcode{\placeholder{#1}}}
+\newcommand{\exposidnc}[1]{\tcode{\placeholdernc{#1}}\itcorr[-1]}
+
+%% Manual insertion of italic corrections, for aligning in the presence
+%% of the above annotations.
+\newlength{\itcorrwidth}
+\newlength{\itletterwidth}
+\newcommand{\itcorr}[1][]{%
+ \settowidth{\itcorrwidth}{\textit{x\/}}%
+ \settowidth{\itletterwidth}{\textit{x\nocorr}}%
+ \addtolength{\itcorrwidth}{-1\itletterwidth}%
+ \makebox[#1\itcorrwidth]{}%
+}
+
+%% allow line break if needed for justification
+\newcommand{\brk}{\discretionary{}{}{}}
+%  especially for scope qualifier
+\newcommand{\colcol}{\brk::\brk}
+
+\newcommand{\CodeBlockSetup}{
+ \lstset{escapechar=@}
+ \renewcommand{\tcode}[1]{\textup{\CodeStylex{##1}}}
+ \renewcommand{\techterm}[1]{\textit{\CodeStylex{##1}}}
+ \renewcommand{\term}[1]{\textit{##1}}
+ \renewcommand{\grammarterm}[1]{\textit{##1}}
+}
+\lstnewenvironment{codeblock}{\CodeBlockSetup}{}
+
+\newcommand{\EXPO}[1]{\textit{#1}}
+\newcommand{\expos}{\EXPO{exposition only}}
+\newcommand{\impdef}{\EXPO{implementation-defined}}
+\newcommand{\impdefnc}{\EXPO{implementation-defined\nocorr}}
+\newcommand{\impdefx}[1]{\EXPO{implementation-defined}}
+
+\newcommand{\UNSP}[1]{\textit{\texttt{#1}}}
+\newcommand{\seebelow}{\UNSP{see below}}
+
+\newcommand{\impldef}[1]{imple\-men\-ta\-tion-defined}
+
+\newcommand{\ecname}[1]{\tcode{\placeholder{#1}}}
+\newcommand{\exposconcept}[1]{\ecname{#1}}
+
+%% Ranges
+\newcommand{\Range}[4]{\ensuremath{#1}\tcode{#3}\ensuremath{,}\,\penalty2000{}\tcode{#4}\ensuremath{#2}}
+\newcommand{\crange}[2]{\Range{[}{]}{#1}{#2}}
+\newcommand{\brange}[2]{\Range{(}{]}{#1}{#2}}
+\newcommand{\orange}[2]{\Range{(}{)}{#1}{#2}}
+\newcommand{\range}[2]{\Range{[}{)}{#1}{#2}}
+\newcommand{\countedrange}[2]{$\tcode{#1} + \range{0}{#2}$}
+
+%% Change descriptions
+\newcommand{\diffhead}[1]{\textbf{#1:}\space}
+\newcommand{\diffdef}[1]{\ifvmode\else\hfill\break\fi\diffhead{#1}}
+
+\def\rSec#1[#2]#3{%
+  \ifcase#1\wgSection[section]{#3}{#2}
+  \or\wgSubsection[subsection]{#3}{#2}
+  \or\wgSubsubsection[subsubsection]{#3}{#2}
+  \or\wgSubsubsubsection[paragraph]{#3}{#2}
+  \or\error
+\fi}
